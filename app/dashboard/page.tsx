@@ -36,6 +36,10 @@ function PerformanceMetrics() {
         setMetrics(data)
       } catch (error) {
         console.error("Failed to fetch metrics:", error)
+        // Check if it's a GraphQL or network error
+        if (error instanceof Error && (error.message?.includes('GraphQL') || error.message?.includes('fetch'))) {
+          console.warn("Backend API unavailable, using fallback data")
+        }
         // Fallback to demo data if API fails
         setMetrics({
           overallScore: 85,

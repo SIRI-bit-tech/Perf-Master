@@ -1,6 +1,6 @@
 import graphene
 from graphene_django import DjangoObjectType
-from graphene_django.filter import DjangoFilterConnectionField
+# from graphene_django.filter import DjangoFilterConnectionField
 from .models import Project, PerformanceMetric, ComponentAnalysis, PerformanceIssue, OptimizationSuggestion
 
 class ProjectType(DjangoObjectType):
@@ -44,35 +44,48 @@ class Query(graphene.ObjectType):
     all_suggestions = graphene.List(OptimizationSuggestionType, project_id=graphene.UUID())
     suggestion = graphene.Field(OptimizationSuggestionType, id=graphene.UUID())
     
-    def resolve_all_projects(self, info):
-        return Project.objects.filter(owner=info.context.user)
-    
-    def resolve_project(self, info, id):
-        return Project.objects.get(id=id, owner=info.context.user)
-    
-    def resolve_all_metrics(self, info, project_id=None):
-        queryset = PerformanceMetric.objects.filter(project__owner=info.context.user)
-        if project_id:
-            queryset = queryset.filter(project_id=project_id)
-        return queryset
-    
-    def resolve_all_components(self, info, project_id=None):
-        queryset = ComponentAnalysis.objects.filter(project__owner=info.context.user)
-        if project_id:
-            queryset = queryset.filter(project_id=project_id)
-        return queryset
-    
-    def resolve_all_issues(self, info, project_id=None):
-        queryset = PerformanceIssue.objects.filter(project__owner=info.context.user)
-        if project_id:
-            queryset = queryset.filter(project_id=project_id)
-        return queryset
-    
-    def resolve_all_suggestions(self, info, project_id=None):
-        queryset = OptimizationSuggestion.objects.filter(project__owner=info.context.user)
-        if project_id:
-            queryset = queryset.filter(project_id=project_id)
-        return queryset
+def resolve_all_projects(self, info):
+    # Check if user is authenticated
+    if not info.context.user.is_authenticated:
+        return Project.objects.none()  # Return empty queryset for anonymous users
+    return Project.objects.filter(owner=info.context.user)
+
+def resolve_project(self, info, id):
+    if not info.context.user.is_authenticated:
+        return None
+    return Project.objects.get(id=id, owner=info.context.user)
+
+def resolve_all_metrics(self, info, project_id=None):
+    if not info.context.user.is_authenticated:
+        return PerformanceMetric.objects.none()
+    queryset = PerformanceMetric.objects.filter(project__owner=info.context.user)
+    if project_id:
+        queryset = queryset.filter(project_id=project_id)
+    return queryset
+
+def resolve_all_components(self, info, project_id=None):
+    if not info.context.user.is_authenticated:
+        return ComponentAnalysis.objects.none()
+    queryset = ComponentAnalysis.objects.filter(project__owner=info.context.user)
+    if project_id:
+        queryset = queryset.filter(project_id=project_id)
+    return queryset
+
+def resolve_all_issues(self, info, project_id=None):
+    if not info.context.user.is_authenticated:
+        return PerformanceIssue.objects.none()
+    queryset = PerformanceIssue.objects.filter(project__owner=info.context.user)
+    if project_id:
+        queryset = queryset.filter(project_id=project_id)
+    return queryset
+
+def resolve_all_suggestions(self, info, project_id=None):
+    if not info.context.user.is_authenticated:
+        return OptimizationSuggestion.objects.none()
+    queryset = OptimizationSuggestion.objects.filter(project__owner=info.context.user)
+    if project_id:
+        queryset = queryset.filter(project_id=project_id)
+    return queryset
 
 class CreateProject(graphene.Mutation):
     class Arguments:

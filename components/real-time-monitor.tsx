@@ -27,7 +27,8 @@ export function RealTimeMonitor({ onPerformanceUpdate }: RealTimeMonitorProps) {
   })
 
   const startTimeRef = useRef<number>(Date.now())
-  const uptimeIntervalRef = useRef<NodeJS.Timeout>()
+  const uptimeIntervalRef = useRef<NodeJS.Timeout | null>(null)
+
 
   useEffect(() => {
     if (isMonitoring) {
@@ -47,18 +48,12 @@ export function RealTimeMonitor({ onPerformanceUpdate }: RealTimeMonitorProps) {
   const connectWebSocket = async () => {
     try {
       setConnectionStatus("connecting")
-      await wsClient.connect()
-      setConnectionStatus("connected")
-
-      // Set up event listeners
-      wsClient.on("performance_update", handlePerformanceUpdate)
-      wsClient.on("system_alert", handleSystemAlert)
-      wsClient.on("connect", () => setConnectionStatus("connected"))
-      wsClient.on("disconnect", () => setConnectionStatus("disconnected"))
-
-      console.log("[v0] Real-time monitoring started")
+      // COMPLETELY DISABLE WebSocket for now
+      console.log("[WebSocket] WebSocket disabled - using static data only")
+      setConnectionStatus("disconnected")
+      return
     } catch (error) {
-      console.error("[v0] WebSocket connection failed:", error)
+      console.error("[WebSocket] Connection failed:", error)
       setConnectionStatus("error")
     }
   }

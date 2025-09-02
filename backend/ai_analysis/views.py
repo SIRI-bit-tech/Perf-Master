@@ -2,9 +2,14 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from django.conf import settings
+import logging # Added
+
 from .models import AIAnalysisJob, CodeAnalysis, PatternDetection
 from .serializers import AIAnalysisJobSerializer, CodeAnalysisSerializer, PatternDetectionSerializer
 from .tasks import analyze_code_performance, detect_performance_patterns
+
+logger = logging.getLogger(__name__) # Added
 
 class AIAnalysisJobViewSet(viewsets.ModelViewSet):
     serializer_class = AIAnalysisJobSerializer
@@ -82,3 +87,4 @@ class PatternDetectionViewSet(viewsets.ReadOnlyModelViewSet):
     
     def get_queryset(self):
         return PatternDetection.objects.filter(project__owner=self.request.user)
+    

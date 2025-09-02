@@ -27,23 +27,29 @@ class Query(graphene.ObjectType):
     all_patterns = graphene.List(PatternDetectionType, project_id=graphene.UUID())
     pattern = graphene.Field(PatternDetectionType, id=graphene.UUID())
     
-    def resolve_all_ai_jobs(self, info, project_id=None):
-        queryset = AIAnalysisJob.objects.filter(project__owner=info.context.user)
-        if project_id:
-            queryset = queryset.filter(project_id=project_id)
-        return queryset
-    
-    def resolve_all_code_analyses(self, info, project_id=None):
-        queryset = CodeAnalysis.objects.filter(project__owner=info.context.user)
-        if project_id:
-            queryset = queryset.filter(project_id=project_id)
-        return queryset
-    
-    def resolve_all_patterns(self, info, project_id=None):
-        queryset = PatternDetection.objects.filter(project__owner=info.context.user)
-        if project_id:
-            queryset = queryset.filter(project_id=project_id)
-        return queryset
+def resolve_all_ai_jobs(self, info, project_id=None):
+    if not info.context.user.is_authenticated:
+        return AIAnalysisJob.objects.none()
+    queryset = AIAnalysisJob.objects.filter(project__owner=info.context.user)
+    if project_id:
+        queryset = queryset.filter(project_id=project_id)
+    return queryset
+
+def resolve_all_code_analyses(self, info, project_id=None):
+    if not info.context.user.is_authenticated:
+        return CodeAnalysis.objects.none()
+    queryset = CodeAnalysis.objects.filter(project__owner=info.context.user)
+    if project_id:
+        queryset = queryset.filter(project_id=project_id)
+    return queryset
+
+def resolve_all_patterns(self, info, project_id=None):
+    if not info.context.user.is_authenticated:
+        return PatternDetection.objects.none()
+    queryset = PatternDetection.objects.filter(project__owner=info.context.user)
+    if project_id:
+        queryset = queryset.filter(project_id=project_id)
+    return queryset
 
 class StartCodeAnalysis(graphene.Mutation):
     class Arguments:

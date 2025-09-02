@@ -35,7 +35,7 @@ export class WebSocketClient {
   private baseUrl: string
 
   constructor(baseUrl = process.env.NEXT_PUBLIC_DJANGO_API_URL || "http://localhost:8000") {
-    this.baseUrl = baseUrl.replace("http", "ws")
+    this.baseUrl = baseUrl.replace(/^http/, 'ws')
   }
 
   connect(): Promise<void> {
@@ -52,13 +52,14 @@ export class WebSocketClient {
       this.isConnecting = true
 
       try {
+        // Clean WebSocket URL without any extra parameters
         const wsUrl = `${this.baseUrl}/ws/performance/`
-        console.log("[v0] Connecting to Django Channels WebSocket:", wsUrl)
+        console.log("[WebSocket] Connecting to:", wsUrl)
 
         this.ws = new WebSocket(wsUrl)
 
         this.ws.onopen = () => {
-          console.log("[v0] WebSocket connected to Django backend")
+          console.log("[WebSocket] Connected successfully")
           this.isConnecting = false
           this.reconnectAttempts = 0
           this.startHeartbeat()
@@ -69,7 +70,7 @@ export class WebSocketClient {
         this.ws.onmessage = (event) => {
           try {
             const data = JSON.parse(event.data)
-            console.log("[v0] Received WebSocket message:", data)
+            console.log("[WebSocket] Received:", data)
 
             // Handle different message types from Django
             switch (data.type) {
@@ -99,12 +100,12 @@ export class WebSocketClient {
                 this.emit(data.type, data.payload)
             }
           } catch (error) {
-            console.error("[v0] Error parsing WebSocket message:", error)
+            console.error("[WebSocket] Error parsing message:", error)
           }
         }
 
         this.ws.onclose = (event) => {
-          console.log("[v0] WebSocket connection closed:", event.code, event.reason)
+          console.log("[WebSocket] Connection closed:", event.code, event.reason)
           this.isConnecting = false
           this.ws = null
 
@@ -120,12 +121,12 @@ export class WebSocketClient {
         }
 
         this.ws.onerror = (error) => {
-          console.error("[v0] WebSocket error:", error)
+          console.error("[WebSocket] Connection error:", error)
           this.isConnecting = false
           reject(error)
         }
       } catch (error) {
-        console.error("[v0] WebSocket connection failed:", error)
+        console.error("[WebSocket] Connection setup failed:", error)
         this.isConnecting = false
         reject(error)
       }
@@ -136,12 +137,12 @@ export class WebSocketClient {
     this.reconnectAttempts++
     const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1)
 
-    console.log(`[v0] Scheduling reconnect attempt ${this.reconnectAttempts} in ${delay}ms`)
+    console.log(`[WebSocket] Scheduling reconnect attempt ${this.reconnectAttempts} in ${delay}ms`)
 
     setTimeout(() => {
       if (this.reconnectAttempts <= this.maxReconnectAttempts) {
         this.connect().catch((error) => {
-          console.error("[v0] Reconnection failed:", error)
+          console.error("[WebSocket] Reconnection failed:", error)
         })
       }
     }, delay)
@@ -181,7 +182,7 @@ export class WebSocketClient {
         try {
           callback(data)
         } catch (error) {
-          console.error("[v0] WebSocket event callback error:", error)
+          console.error("[WebSocket] Event callback error:", error)
         }
       })
     }
@@ -190,9 +191,9 @@ export class WebSocketClient {
   send(message: WebSocketMessage) {
     if (this.ws?.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(message))
-      console.log("[v0] Sent WebSocket message:", message)
+      console.log("[WebSocket] Sent:", message)
     } else {
-      console.warn("[v0] Cannot send message - WebSocket not connected")
+      console.warn("[WebSocket] Cannot send - WebSocket not connected")
     }
   }
 
@@ -229,7 +230,7 @@ export class WebSocketClient {
 
     this.listeners.clear()
     this.reconnectAttempts = 0
-    console.log("[v0] WebSocket disconnected")
+    console.log("[WebSocket] Disconnected")
   }
 
   getConnectionState(): "connecting" | "connected" | "disconnected" | "error" {

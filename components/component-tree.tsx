@@ -92,7 +92,7 @@ export function ComponentTree() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    loadComponentData()
+    // loadComponentData()
   }, [])
 
   const loadComponentData = async () => {

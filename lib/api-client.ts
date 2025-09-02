@@ -75,7 +75,7 @@ export class PerfMasterAPI {
 
   constructor(baseUrl = process.env.NEXT_PUBLIC_DJANGO_API_URL || "http://localhost:8000") {
     this.baseUrl = baseUrl
-    this.wsUrl = baseUrl.replace("http", "ws")
+    this.wsUrl = baseUrl.replace(/^http/, 'ws')
   }
 
   // GraphQL queries
@@ -84,7 +84,7 @@ export class PerfMasterAPI {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("auth_token") || ""}`,
+        Authorization: `Bearer ${typeof window !== 'undefined' ? localStorage.getItem("auth_token") || "" : ""}`,
       },
       body: JSON.stringify({ query, variables }),
     })
@@ -122,37 +122,21 @@ export class PerfMasterAPI {
   // Real-time performance metrics
   async getMetrics(timeRange = "1h", interval = "1m") {
     const query = `
-      query GetMetrics($timeRange: String!, $interval: String!) {
-        performanceMetrics(timeRange: $timeRange, interval: $interval) {
+      query GetMetrics {
+        allMetrics {
           id
           timestamp
-          coreWebVitals {
-            lcp
-            fid
-            cls
-            fcp
-            ttfb
-          }
-          runtime {
-            heapUsed
-            heapTotal
-            external
-            arrayBuffers
-          }
-          network {
-            requests
-            totalSize
-            cacheHitRate
-          }
-          rendering {
-            fps
-            frameDrops
-            paintTime
+          value
+          metricType
+          url
+          project {
+            id
+            name
           }
         }
       }
     `
-    return this.graphqlQuery(query, { timeRange, interval })
+    return this.graphqlQuery(query)
   }
 
   // ✅ Explicit method so your frontend can call it directly
@@ -248,7 +232,7 @@ export class PerfMasterAPI {
     })
   }
 
-  // ✅ WebSocket connection for real-time updates (fixed with projectId)
+  // ✅ WebSocket connection for real-time updates
   connectWebSocket(
     projectId: string,
     onMessage: (data: any) => void,
