@@ -1,0 +1,72 @@
+[
+  {
+    "model": "performance.project",
+    "pk": 1,
+    "fields": {
+      "name": "Sample React App",
+      "description": "A sample React application for testing PerfMaster",
+      "url": "https://example.com",
+      "framework": "react",
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "performance.performancemetric",
+    "pk": 1,
+    "fields": {
+      "project": 1,
+      "lcp": 1.2,
+      "fid": 8.0,
+      "cls": 0.05,
+      "ttfb": 0.8,
+      "fcp": 1.1,
+      "timestamp": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "performance.component",
+    "pk": 1,
+    "fields": {
+      "project": 1,
+      "name": "Header",
+      "path": "/components/Header.tsx",
+      "render_time": 12.5,
+      "mount_time": 8.2,
+      "memory_usage": 1024,
+      "bundle_size": 2048,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "performance.performanceissue",
+    "pk": 1,
+    "fields": {
+      "project": 1,
+      "component": 1,
+      "issue_type": "performance",
+      "severity": "medium",
+      "title": "Component re-renders unnecessarily",
+      "description": "The Header component re-renders on every state change. Consider using React.memo.",
+      "suggestion": "Wrap the Header component with React.memo to prevent unnecessary re-renders.",
+      "is_resolved": false,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "performance.aianalysis",
+    "pk": 1,
+    "fields": {
+      "project": 1,
+      "analysis_type": "performance",
+      "input_code": "function Header() { return <div>Header</div>; }",
+      "suggestions": "[\"Use React.memo for optimization\", \"Consider lazy loading\"]",
+      "confidence_score": 0.85,
+      "model_used": "huggingface/code-analysis",
+      "processing_time": 1.2,
+      "created_at": "2024-01-01T00:00:00Z"
+    }
+  }
+]

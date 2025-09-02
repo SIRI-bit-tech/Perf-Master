@@ -1,0 +1,39 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/next"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/websocket",
+      "dest": "/api/websocket"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
+  ],
+  "env": {
+    "DATABASE_URL": "@database-url",
+    "REDIS_URL": "@redis-url",
+    "NEXTAUTH_SECRET": "@nextauth-secret",
+    "GROQ_API_KEY": "@groq-api-key",
+    "FAL_KEY": "@fal-key",
+    "DEEPINFRA_API_KEY": "@deepinfra-api-key"
+  },
+  "functions": {
+    "app/api/websocket/route.ts": {
+      "maxDuration": 300
+    },
+    "app/api/performance/analyze/route.ts": {
+      "maxDuration": 60
+    }
+  }
+}
